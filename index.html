@@ -45,7 +45,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 
 <!-- Preload críticos · móvil first-paint -->
-<link rel="preload" as="image" href="logo.png" fetchpriority="high">
+<link rel="preload" as="image" href="fotos/logos/logo.png" fetchpriority="high">
 <link rel="dns-prefetch" href="https://chat.whatsapp.com">
 <link rel="dns-prefetch" href="https://maps.google.com">
 <link rel="preconnect" href="https://chat.whatsapp.com" crossorigin>
@@ -246,8 +246,24 @@ tailwind.config = {
   }
   /* Reduce GPU pressure on mid/low-end devices */
   @media (max-width: 768px) {
+    /* Decoraciones costosas: ocultas o atenuadas */
     .grain { display: none; }
     .aurora::before, .aurora::after { filter: blur(40px) !important; opacity: .35 !important; }
+    .cursor-glow { display: none !important; }
+    /* Animaciones infinitas decorativas pausadas en mobile (battery + jank) */
+    .wax-seal { animation: none !important; }
+    .btn-shine::after { animation-duration: 8s !important; opacity: .7; }
+    /* Tilt 3D nunca aplica en touch · transform reset asegura layout limpio */
+    .tilt-card .tilt-inner { transform: none !important; perspective: none !important; }
+    /* Imágenes de speakers: sin scale-on-hover en touch (no aplica anyway) */
+    .speaker-card img { transition: none !important; }
+    /* Reducir transition-duration global en mobile para sensación más viva */
+    .speaker-card { transition-duration: .35s !important; }
+    /* content-visibility también en speakers/agenda en mobile (más reflows liberados) */
+    #ponentes, #agenda, #marketplace, #patrocinadores, #info, #quotes {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 800px;
+    }
   }
 
   /* Wax seal · subtle continuous breathing + extra glow on parent hover */
@@ -297,10 +313,52 @@ tailwind.config = {
 
   .border-soft { border-color: rgba(255,255,255,0.08); }
 
-  /* Fade-up baseline (no scroll-timeline support fallback) */
+  /* === Reveal animations · entra desde abajo al ver (motion-safe) === */
   @media (prefers-reduced-motion: no-preference) {
-    .js-reveal { opacity:0; transform: translateY(32px) scale(.98); filter: blur(4px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1), filter .7s cubic-bezier(.2,.8,.2,1); }
-    .js-reveal.in { opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+    /* Texto / blocs ligeros · fade + slight up + suave scale */
+    .js-reveal {
+      opacity: 0;
+      transform: translateY(28px) scale(.985);
+      filter: blur(3px);
+      transition:
+        opacity .8s cubic-bezier(.2,.8,.2,1),
+        transform .9s cubic-bezier(.2,.8,.2,1),
+        filter .55s cubic-bezier(.2,.8,.2,1);
+      will-change: opacity, transform, filter;
+    }
+    .js-reveal.in { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+
+    /* Cards (speakers, guests, quotes, marketplace) · entra desde abajo con bounce sutil */
+    .card-fall {
+      opacity: 0;
+      transform: translateY(36px) scale(.96);
+      transition:
+        opacity .75s cubic-bezier(.2,.8,.2,1),
+        transform .9s cubic-bezier(.16,1.05,.3,1);    /* leve overshoot */
+      will-change: opacity, transform;
+    }
+    .card-fall.in { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* Mobile · reveals más rápidos y sin blur (caro en GPU) para sensación fluida */
+    @media (max-width: 768px) {
+      .js-reveal {
+        transform: translateY(20px);
+        filter: none;
+        transition:
+          opacity .55s cubic-bezier(.2,.8,.2,1),
+          transform .65s cubic-bezier(.2,.8,.2,1);
+      }
+      .js-reveal.in { transform: translateY(0); }
+      .card-fall {
+        transform: translateY(26px) scale(.97);
+        transition:
+          opacity .5s cubic-bezier(.2,.8,.2,1),
+          transform .65s cubic-bezier(.16,1.05,.3,1);
+      }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .js-reveal, .card-fall { opacity: 1 !important; transform: none !important; filter: none !important; }
   }
 
     /* =====================================================
@@ -727,7 +785,7 @@ tailwind.config = {
 <header class="fixed top-0 inset-x-0 z-50 border-b border-soft backdrop-blur-xl bg-ink-950/60" role="banner">
   <nav class="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between" aria-label="Navegación principal">
     <a href="#" aria-label="Volver al inicio" class="flex items-center gap-2.5 group focus:outline-none focus-visible:outline-2 focus-visible:outline-gold-300 rounded-md">
-      <img src="logo.png" alt="" aria-hidden="true" width="32" height="32" fetchpriority="high" decoding="async" class="h-8 w-auto opacity-95 group-hover:opacity-100 group-hover:scale-105 group-active:scale-95 transition-all duration-300" style="mix-blend-mode: lighten;">
+      <img src="fotos/logos/logo.png" alt="" aria-hidden="true" width="32" height="32" fetchpriority="high" decoding="async" class="h-8 w-auto opacity-95 group-hover:opacity-100 group-hover:scale-105 group-active:scale-95 transition-all duration-300" style="mix-blend-mode: lighten;">
       <span class="text-sm font-medium tracking-tight hidden sm:inline">Show Me The Money</span>
     </a>
     <ul class="hidden md:flex items-center gap-8 text-sm text-white/70 list-none m-0 p-0">
@@ -1258,7 +1316,7 @@ tailwind.config = {
   <div class="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-3 gap-10 items-start">
     <div>
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="28" height="28" class="h-7 w-auto opacity-90" style="mix-blend-mode: lighten;">
+        <img src="fotos/logos/logo.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="28" height="28" class="h-7 w-auto opacity-90" style="mix-blend-mode: lighten;">
         <span class="text-sm font-medium tracking-tight">Show Me The Money</span>
       </div>
       <p class="mt-4 text-sm text-white/50 max-w-xs">Madrid · Cinesa Las Rozas · 23 mayo 2026 · 8:00 – 20:00</p>
@@ -1629,20 +1687,32 @@ const MARKETPLACE = [
   { from:'Víctor Alvargonzález', name:'Nextep Finance', desc:'Asesoramiento independiente desde 79€/trimestre.', cta:'Suscribirme', url:'https://www.nextepfinance.com/', accent:'gold' }
 ];
 
-// === Render ===
+// === Render helpers ===
+// Stagger más rápido en mobile (cards aparecen seguidas, no acumulan delay).
+const IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
+const STAGGER = IS_MOBILE ? 0.5 : 1;
+const stg = (i, base) => Math.round(i * base * STAGGER);
+
 function bindTilt(el) {
+  // Tilt 3D solo en pointers que soporten hover (no touch). Skip en mobile/tablet.
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
   const inner = el.querySelector('.tilt-inner');
   if (!inner) return;
   const max = 6;
+  let raf;
   el.addEventListener('mousemove', (e) => {
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width;
-    const py = (e.clientY - r.top) / r.height;
-    const ry = (px - 0.5) * (max * 2);
-    const rx = (0.5 - py) * (max * 2);
-    inner.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const ry = (px - 0.5) * (max * 2);
+      const rx = (0.5 - py) * (max * 2);
+      inner.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
   });
   el.addEventListener('mouseleave', () => {
+    cancelAnimationFrame(raf);
     inner.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
   });
 }
@@ -1650,7 +1720,7 @@ function bindTilt(el) {
 function renderSpeakers() {
   const grid = document.getElementById('speakers-grid');
   grid.innerHTML = SPEAKERS.map((s, i) => `
-    <button data-id="${s.id}" type="button" aria-label="Abrir perfil de ${s.name} — ${s.tag}" class="speaker-card tilt-card card-fall group text-left relative bg-ink-900 border border-soft rounded-3xl overflow-hidden" style="transition-delay:${i*60}ms">
+    <button data-id="${s.id}" type="button" aria-label="Abrir perfil de ${s.name} — ${s.tag}" class="speaker-card tilt-card card-fall group text-left relative bg-ink-900 border border-soft rounded-3xl overflow-hidden" style="transition-delay:${stg(i, 60)}ms">
       <div class="tilt-inner relative rounded-3xl overflow-hidden">
         <div class="aspect-[4/5] overflow-hidden relative">
           <img src="${s.photo}" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -1676,7 +1746,7 @@ function renderSpeakers() {
 function renderGuests() {
   const grid = document.getElementById('guests-grid');
   grid.innerHTML = GUESTS.map((g, i) => `
-    <button data-id="${g.id}" data-type="guest" type="button" aria-label="Abrir perfil de ${g.name} — ${g.tag}" class="speaker-card tilt-card card-fall group text-left relative bg-ink-900 border border-soft rounded-2xl overflow-hidden" style="transition-delay:${i*40}ms">
+    <button data-id="${g.id}" data-type="guest" type="button" aria-label="Abrir perfil de ${g.name} — ${g.tag}" class="speaker-card tilt-card card-fall group text-left relative bg-ink-900 border border-soft rounded-2xl overflow-hidden" style="transition-delay:${stg(i, 40)}ms">
       <div class="tilt-inner relative rounded-2xl overflow-hidden">
         <div class="aspect-[4/5] overflow-hidden relative">
           <img src="${g.photo}" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -1735,7 +1805,7 @@ function renderAgenda() {
     const highlightClass = isHighlight ? 'border-gold-300/30 bg-gold-300/[.025]' : 'border-soft';
     return `
       ${separator}
-      <div class="contents js-reveal" style="transition-delay:${i*40}ms">
+      <div class="contents js-reveal" style="transition-delay:${stg(i, 40)}ms">
         <p class="font-display text-3xl text-gold-300 md:text-right pt-5 border-t ${highlightClass}">${a.time}</p>
         <div class="pt-5 pb-7 border-t ${highlightClass}">
           <h3 class="font-display text-2xl ${isHighlight ? 'text-gold-200' : ''}">${a.title}${isHighlight ? ' <span class="inline-block ml-2 align-middle text-[9px] uppercase tracking-[0.3em] text-gold-400 bg-gold-300/10 border border-gold-300/30 rounded-full px-2 py-0.5">★ Highlight</span>' : ''}</h3>
@@ -1763,7 +1833,7 @@ function renderMarketplace() {
   grid.innerHTML = MARKETPLACE.map((p, i) => {
     const dom = domainOf(p.url);
     return `
-    <article class="rounded-2xl border border-soft bg-ink-900 hover:border-money-500/40 hover:bg-ink-800/60 md:hover:-translate-y-1 transition-all duration-500 ease-out p-7 flex flex-col card-fall" style="transition-delay:${i*60}ms">
+    <article class="rounded-2xl border border-soft bg-ink-900 hover:border-money-500/40 hover:bg-ink-800/60 md:hover:-translate-y-1 transition-all duration-500 ease-out p-7 flex flex-col card-fall" style="transition-delay:${stg(i, 60)}ms">
       <p class="text-[10px] uppercase tracking-[0.25em] ${p.accent==='gold'?'text-gold-400':'text-money-400'}">De ${p.from}</p>
       <h3 class="font-display text-2xl mt-3 leading-tight">${p.name}</h3>
       <p class="text-sm text-white/60 mt-3 flex-1 leading-relaxed">${p.desc}</p>
@@ -1781,7 +1851,7 @@ const ORGANIZA = [
   { name: 'Show Me The Money', src: 'fotos/organiza/Vertical-Negro.png', invert: true }
 ];
 const PATROCINA = [
-  { name: 'Influentia', src: 'fotos/patrocinador/influentia.jpg', invert: false }
+  { name: 'Influentia', src: 'fotos/patrocinador/Capa_1-2-1.svg', invert: false }
 ];
 const COLABORA = [
   { name: 'AlfaZ',        src: 'fotos/colaboradores/AlfaZ.png',        invert: true },
@@ -1898,7 +1968,7 @@ function renderQuotes() {
   // Solo speakers que tienen `intro` no vacío
   const list = SPEAKERS.filter(s => s.intro);
   grid.innerHTML = list.map((s, i) => `
-    <button data-id="${s.id}" type="button" aria-label="Abrir perfil de ${s.name}" class="quote-card group text-left card-fall p-5 md:p-6 rounded-2xl border border-soft bg-ink-900/70 hover:border-gold-300/40 hover:bg-ink-900 md:hover:-translate-y-0.5 active:scale-[.99] transition-all duration-300 flex flex-col gap-4 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300" style="transition-delay:${i*50}ms">
+    <button data-id="${s.id}" type="button" aria-label="Abrir perfil de ${s.name}" class="quote-card group text-left card-fall p-5 md:p-6 rounded-2xl border border-soft bg-ink-900/70 hover:border-gold-300/40 hover:bg-ink-900 md:hover:-translate-y-0.5 active:scale-[.99] transition-all duration-300 flex flex-col gap-4 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300" style="transition-delay:${stg(i, 50)}ms">
       <span class="font-display text-5xl text-gold-300/80 leading-[0.6] select-none -mb-2 group-hover:text-gold-300 transition-colors duration-300" aria-hidden="true">"</span>
       <p class="font-display text-base md:text-lg leading-snug text-white/95 italic flex-1">${s.intro}</p>
       <div class="mt-1 flex items-center gap-3 pt-3 border-t border-soft">
@@ -2201,6 +2271,9 @@ document.querySelectorAll('[data-mask]').forEach(el => {
     targets.forEach(t => t.classList.add('in'));
     return;
   }
+  // Mobile: trigger antes (rootMargin negativo más pequeño) para que las cards aparezcan mientras scrollea,
+  // no después de pasar el centro de la pantalla.
+  const isMobile = window.innerWidth < 768;
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -2208,7 +2281,10 @@ document.querySelectorAll('[data-mask]').forEach(el => {
         io.unobserve(e.target);
       }
     });
-  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  }, {
+    rootMargin: isMobile ? '0px 0px -2% 0px' : '0px 0px -8% 0px',
+    threshold: isMobile ? 0.01 : 0.05
+  });
   targets.forEach(t => io.observe(t));
   // Also observe any new ones added later (dynamic renders)
   const mo = new MutationObserver((muts) => {
