@@ -310,16 +310,18 @@ tailwind.config = {
     /* =====================================================
      APPLE-STYLE SCROLL-CONTROLLED VIDEO INTRO
      ===================================================== */
+  /* Video intro · 16.27s, vertical 9:16. Scroll budget calibrado para scrub natural:
+     desktop ~900vh (~56vh por segundo de video → ~8 viewports de scroll activo),
+     mobile ~550svh (~34svh/s → ~4.5 viewports — natural en pulgar, sin extender demasiado). */
   .intro-video-section {
     position: relative;
-    height: 600vh;            /* scroll budget — pin lasts (height - 100vh) */
+    height: 900vh;            /* scroll budget · pin lasts (height - 100vh) */
     background: #06231b;
     z-index: 1;
   }
   @media (max-width: 768px) {
-    /* Mobile: intro reducido a 1 pantalla. El usuario ya tiene la entrada,
-       no necesita 4 pantallas de scroll para llegar al contenido útil. */
-    .intro-video-section { height: 110svh; }
+    /* Mobile: 4.5 viewports de scroll activo. Video natural y no fatigante. */
+    .intro-video-section { height: 550svh; }
   }
   .intro-video-pin {
     position: sticky; top: 0;
@@ -329,6 +331,7 @@ tailwind.config = {
     background: #06231b;
     isolation: isolate;
   }
+  /* Mobile: video vertical 9:16 llena perfectamente la pantalla con cover */
   .intro-video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -340,6 +343,27 @@ tailwind.config = {
     will-change: contents;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+  }
+  /* Desktop: video vertical 9:16 ocupa toda la altura, centrado horizontalmente.
+     object-fit:cover llena el ancho con el centro vertical del video (que es el contenido principal). */
+  @media (min-width: 768px) {
+    .intro-video {
+      object-fit: cover;
+      object-position: center 35%;
+    }
+    /* Halo decorativo detrás del video — gradiente verde con destellos dorados sutiles */
+    .intro-video-pin::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(6,35,27,.55) 75%),
+        radial-gradient(ellipse at 25% 35%, rgba(212,168,81,.05), transparent 55%),
+        radial-gradient(ellipse at 75% 65%, rgba(212,168,81,.05), transparent 55%);
+      pointer-events: none;
+      z-index: 2;
+      mix-blend-mode: multiply;
+    }
   }
   /* Soft vignette to blend the video into the page palette */
   .intro-vignette {
@@ -452,13 +476,13 @@ tailwind.config = {
     header {
       animation: nav-intro-hide linear both;
       animation-timeline: scroll(root);
-      animation-range: 0vh 580vh;     /* desktop: intro is 600vh; show nav at end */
+      animation-range: 0vh 880vh;     /* desktop: intro is 900vh; show nav cerca del final */
     }
   }
   @media (max-width: 768px) {
     @supports (animation-timeline: scroll()) {
       header {
-        animation-range: 0vh 400vh;   /* mobile: intro is 420vh */
+        animation-range: 0svh 530svh; /* mobile: intro is 550svh */
       }
     }
   }
