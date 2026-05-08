@@ -1,0 +1,22 @@
+# Heavy / generated / local-only
+node_modules/
+shots/
+*.mov
+.DS_Store
+
+# Local agent / scraper helpers (no necesarios para publicar)
+capture.js
+capture_modal.js
+capture_ponentes.js
+check_images.js
+scrape.js
+scrape2.js
+scrape3.js
+
+# Notas internas del agente
+Funnel copy architect.md
+Landing Page Pro.md
+SEO Content Machine.md
+
+# Claude internals
+.claude/
